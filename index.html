@@ -5,10 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Mini App Game</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2>Игра окончена!</h2>
+            <p id="gameOverText"></p>
+            <p id="gameOverScore"></p>
+            <button id="restartButton">Играть снова</button>
+        </div>
+    </div>
+    
     <script src="script.js"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@ let score = 0;
 let speed = 2;
 let gravity = 0.5;
 let jumpStrength = -10;
+let gameOverTexts = [];
 
 // Procedural generation functions
 function randomColor() {
@@ -254,9 +255,9 @@ class BackgroundLayer {
 let character = new Character();
 let obstacles = [];
 let backgroundLayers = [
-    new BackgroundLayer(0.5, '#98FB98', 100), // Grass
+    new BackgroundLayer(0.2, '#87CEEB', canvas.height), // Sky
     new BackgroundLayer(1, '#228B22', 50),   // Distant hills
-    new BackgroundLayer(0.2, '#87CEEB', canvas.height) // Sky (but parallax)
+    new BackgroundLayer(0.5, '#98FB98', 100) // Grass
 ];
 
 // Generate obstacles
@@ -274,9 +275,22 @@ function checkCollision() {
             character.y < obs.y + obs.height &&
             character.y + character.height > obs.y) {
             gameRunning = false;
-            alert('Game Over! Score: ' + score);
-            resetGame();
+            showGameOver();
         }
+    }
+}
+
+// Show game over modal
+function showGameOver() {
+    const randomText = gameOverTexts[Math.floor(Math.random() * gameOverTexts.length)];
+    document.getElementById('gameOverText').textContent = randomText;
+    document.getElementById('gameOverScore').textContent = 'Score: ' + Math.floor(score);
+    document.getElementById('gameOverModal').style.display = 'flex';
+
+    // Text-to-speech
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(randomText);
+        window.speechSynthesis.speak(utterance);
     }
 }
 
@@ -286,6 +300,8 @@ function resetGame() {
     obstacles = [];
     score = 0;
     speed = 2;
+    gameRunning = true;
+    document.getElementById('gameOverModal').style.display = 'none';
 }
 
 // Update game
@@ -346,6 +362,17 @@ canvas.addEventListener('mousedown', (e) => {
     }
     character.jump();
 });
+
+// Load game over texts
+fetch('texts.txt')
+    .then(response => response.text())
+    .then(text => {
+        gameOverTexts = text.split('\n').filter(line => line.trim() !== '');
+    })
+    .catch(error => console.error('Error loading texts:', error));
+
+// Restart button event
+document.getElementById('restartButton').addEventListener('click', resetGame);
 
 // Start game
 gameLoop();
