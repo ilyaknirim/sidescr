@@ -10,7 +10,7 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 // Game variables
-let gameRunning = false;
+let gameRunning = true;
 let score = 0;
 let speed = 2;
 let gravity = 0.5;
@@ -331,6 +331,15 @@ function gameLoop() {
 
 // Touch controls
 canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (!gameRunning) {
+        gameRunning = true;
+    }
+    character.jump();
+});
+
+// Mouse controls for PC testing
+canvas.addEventListener('mousedown', (e) => {
     e.preventDefault();
     if (!gameRunning) {
         gameRunning = true;
