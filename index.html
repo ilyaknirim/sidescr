@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jump Runner - Telegram Mini App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="start-screen">
+            <h1>Jump Runner</h1>
+            <p>Нажмите, чтобы прыгнуть и уклоняйтесь от препятствий!</p>
+            <button id="start-button">Начать игру</button>
+        </div>
+        <div id="game-screen" class="hidden">
+            <div id="score">0</div>
+            <div id="game-area">
+                <div id="player"></div>
+                <!-- Препятствия будут генерироваться динамически -->
+            </div>
+        </div>
+        <div id="game-over-screen" class="hidden">
+            <h2>Игра окончена!</h2>
+            <p>Ваш счет: <span id="final-score">0</span></p>
+            <button id="restart-button">Играть снова</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
