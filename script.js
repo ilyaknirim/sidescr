@@ -26,27 +26,74 @@ function randomSize(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+function randomBool() {
+    return Math.random() > 0.5;
+}
+
 // Character class
 class Character {
     constructor() {
         this.x = 100;
         this.y = canvas.height - 150;
-        this.width = randomSize(30, 50);
-        this.height = randomSize(40, 60);
-        this.color = randomColor();
+        this.width = randomSize(40, 60);
+        this.height = randomSize(50, 70);
         this.velocityY = 0;
         this.onGround = true;
-        this.wings = Math.random() > 0.5; // Randomly has wings or not
+        this.svg = this.generateSVG();
+        this.image = new Image();
+        this.image.src = 'data:image/svg+xml;base64,' + btoa(this.svg);
+    }
+
+    generateSVG() {
+        const bodyColor = randomColor();
+        const headColor = randomColor();
+        const wingColor = randomColor();
+        const legColor = randomColor();
+        const hasWings = randomBool();
+        const hasSpikes = randomBool();
+        const eyeCount = Math.floor(Math.random() * 3) + 1; // 1-3 eyes
+
+        let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+
+        // Body (ellipse)
+        svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 10}" rx="${this.width/3}" ry="${this.height/3}" fill="${bodyColor}"/>`;
+
+        // Head (circle)
+        svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/6}" fill="${headColor}"/>`;
+
+        // Eyes
+        for (let i = 0; i < eyeCount; i++) {
+            const eyeX = this.width/2 + (i - (eyeCount-1)/2) * 8;
+            svg += `<circle cx="${eyeX}" cy="${this.height/4 - 5}" r="3" fill="#000"/>`;
+        }
+
+        // Legs
+        svg += `<rect x="${this.width/2 - 5}" y="${this.height/2 + 20}" width="3" height="15" fill="${legColor}"/>`;
+        svg += `<rect x="${this.width/2 + 2}" y="${this.height/2 + 20}" width="3" height="15" fill="${legColor}"/>`;
+
+        if (hasWings) {
+            // Wings (triangles)
+            svg += `<polygon points="${this.width/2 - 15},${this.height/2} ${this.width/2 - 5},${this.height/2 - 10} ${this.width/2 - 5},${this.height/2 + 10}" fill="${wingColor}"/>`;
+            svg += `<polygon points="${this.width/2 + 5},${this.height/2} ${this.width/2 + 15},${this.height/2 - 10} ${this.width/2 + 5},${this.height/2 + 10}" fill="${wingColor}"/>`;
+        }
+
+        if (hasSpikes) {
+            // Spikes on back
+            for (let i = 0; i < 3; i++) {
+                const spikeX = this.width/2 + (i - 1) * 8;
+                svg += `<polygon points="${spikeX-2},${this.height/2 - 5} ${spikeX},${this.height/2 - 15} ${spikeX+2},${this.height/2 - 5}" fill="${randomColor()}"/>`;
+            }
+        }
+
+        svg += '</svg>';
+        return svg;
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        if (this.wings) {
-            // Draw wings
-            ctx.fillStyle = randomColor();
-            ctx.fillRect(this.x - 10, this.y + 5, 15, this.height - 10);
-            ctx.fillRect(this.x + this.width - 5, this.y + 5, 15, this.height - 10);
+        if (this.image.complete) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            this.image.onload = () => ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
     }
 
@@ -64,9 +111,7 @@ class Character {
     }
 
     jump() {
-        if (this.onGround || this.wings) {
-            this.velocityY = jumpStrength;
-        }
+        this.velocityY = jumpStrength;
     }
 }
 
@@ -74,33 +119,106 @@ class Character {
 class Obstacle {
     constructor(x) {
         this.x = x;
-        this.y = canvas.height - 100 - randomSize(20, 80);
-        this.width = randomSize(20, 60);
-        this.height = randomSize(30, 100);
-        this.color = randomColor();
+        this.width = randomSize(30, 80);
+        this.height = randomSize(40, 120);
         this.type = Math.random() > 0.5 ? 'ground' : 'air'; // Ground or air obstacle
-        if (this.type === 'air') {
-            this.y = randomSize(100, canvas.height - 200);
+        if (this.type === 'ground') {
+            this.y = canvas.height - 100 - this.height;
+        } else {
+            this.y = randomSize(100, canvas.height - 200 - this.height);
         }
-        // Make it unusual: random shape
-        this.shape = Math.floor(Math.random() * 3); // 0: rect, 1: circle, 2: triangle
+        this.svg = this.generateSVG();
+        this.image = new Image();
+        this.image.src = 'data:image/svg+xml;base64,' + btoa(this.svg);
+    }
+
+    generateSVG() {
+        const objectTypes = ['tree', 'rock', 'cloud', 'house', 'car', 'animal'];
+        const objectType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+
+        let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+
+        const color1 = randomColor();
+        const color2 = randomColor();
+        const color3 = randomColor();
+
+        switch (objectType) {
+            case 'tree':
+                // Unusual tree: with fruits or flowers
+                svg += `<rect x="${this.width/2 - 5}" y="${this.height - 20}" width="10" height="20" fill="#8B4513"/>`;
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2}" ry="${this.height/2}" fill="${color1}"/>`;
+                // Add unusual elements: eyes or mouth
+                svg += `<circle cx="${this.width/2 - 5}" cy="${this.height/2 - 10}" r="3" fill="#000"/>`;
+                svg += `<circle cx="${this.width/2 + 5}" cy="${this.height/2 - 10}" r="3" fill="#000"/>`;
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 5}" rx="4" ry="2" fill="#000"/>`;
+                break;
+            case 'rock':
+                // Unusual rock: with crystals or faces
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2}" ry="${this.height/2}" fill="${color1}"/>`;
+                // Add crystals
+                for (let i = 0; i < 3; i++) {
+                    const cx = this.width/2 + (Math.random() - 0.5) * this.width/2;
+                    const cy = this.height/2 + (Math.random() - 0.5) * this.height/2;
+                    svg += `<polygon points="${cx-3},${cy+5} ${cx},${cy-5} ${cx+3},${cy+5}" fill="${color2}"/>`;
+                }
+                break;
+            case 'cloud':
+                // Unusual cloud: with faces or lightning
+                svg += `<ellipse cx="${this.width/3}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
+                svg += `<ellipse cx="${2*this.width/3}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
+                // Add face
+                svg += `<circle cx="${this.width/2 - 10}" cy="${this.height/2 - 5}" r="2" fill="#000"/>`;
+                svg += `<circle cx="${this.width/2 + 10}" cy="${this.height/2 - 5}" r="2" fill="#000"/>`;
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 5}" rx="3" ry="1" fill="#000"/>`;
+                break;
+            case 'house':
+                // Unusual house: floating or with weird features
+                svg += `<rect x="${this.width/4}" y="${this.height/2}" width="${this.width/2}" height="${this.height/2}" fill="${color1}"/>`;
+                svg += `<polygon points="${this.width/4},${this.height/2} ${this.width/2},${this.height/4} ${3*this.width/4},${this.height/2}" fill="${color2}"/>`;
+                // Add windows with eyes
+                svg += `<rect x="${this.width/3}" y="${this.height/2 + 10}" width="8" height="8" fill="#87CEEB"/>`;
+                svg += `<circle cx="${this.width/3 + 2}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
+                svg += `<circle cx="${this.width/3 + 6}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
+                svg += `<rect x="${this.width/2 + 5}" y="${this.height/2 + 10}" width="8" height="8" fill="#87CEEB"/>`;
+                svg += `<circle cx="${this.width/2 + 7}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
+                svg += `<circle cx="${this.width/2 + 11}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
+                break;
+            case 'car':
+                // Unusual car: with animal features
+                svg += `<rect x="${this.width/6}" y="${this.height/2}" width="${2*this.width/3}" height="${this.height/3}" fill="${color1}"/>`;
+                svg += `<ellipse cx="${this.width/6}" cy="${this.height - 10}" rx="8" ry="5" fill="#000"/>`;
+                svg += `<ellipse cx="${5*this.width/6}" cy="${this.height - 10}" rx="8" ry="5" fill="#000"/>`;
+                // Add headlights with eyes
+                svg += `<circle cx="${this.width/6 - 5}" cy="${this.height/2 + 5}" r="3" fill="#FFFF00"/>`;
+                svg += `<circle cx="${5*this.width/6 + 5}" cy="${this.height/2 + 5}" r="3" fill="#FFFF00"/>`;
+                svg += `<circle cx="${this.width/6 - 5}" cy="${this.height/2 + 5}" r="1" fill="#000"/>`;
+                svg += `<circle cx="${5*this.width/6 + 5}" cy="${this.height/2 + 5}" r="1" fill="#000"/>`;
+                break;
+            case 'animal':
+                // Unusual animal: mix of features
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
+                svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/8}" fill="${color2}"/>`;
+                // Legs
+                svg += `<rect x="${this.width/2 - 8}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
+                svg += `<rect x="${this.width/2 - 3}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
+                svg += `<rect x="${this.width/2 + 2}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
+                svg += `<rect x="${this.width/2 + 7}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
+                // Eyes
+                svg += `<circle cx="${this.width/2 - 5}" cy="${this.height/4 - 3}" r="2" fill="#000"/>`;
+                svg += `<circle cx="${this.width/2 + 5}" cy="${this.height/4 - 3}" r="2" fill="#000"/>`;
+                break;
+        }
+
+        svg += '</svg>';
+        return svg;
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        if (this.shape === 0) {
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-        } else if (this.shape === 1) {
-            ctx.beginPath();
-            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
-            ctx.fill();
+        if (this.image.complete) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         } else {
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + this.height);
-            ctx.lineTo(this.x + this.width/2, this.y);
-            ctx.lineTo(this.x + this.width, this.y + this.height);
-            ctx.closePath();
-            ctx.fill();
+            this.image.onload = () => ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
     }
 
