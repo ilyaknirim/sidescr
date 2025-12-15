@@ -53,36 +53,116 @@ class Character {
         const hasWings = randomBool();
         const hasSpikes = randomBool();
         const eyeCount = Math.floor(Math.random() * 3) + 1; // 1-3 eyes
+        const hasTail = randomBool();
+        const hasAntenna = randomBool();
 
         let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
 
-        // Body (ellipse)
-        svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 10}" rx="${this.width/3}" ry="${this.height/3}" fill="${bodyColor}"/>`;
+        // Тень под персонажем
+        svg += `<ellipse cx="${this.width/2}" cy="${this.height - 5}" rx="${this.width/3}" ry="3" fill="#00000030"/>`;
 
-        // Head (circle)
-        svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/6}" fill="${headColor}"/>`;
+        // Тело (более детализированное)
+        svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 10}" rx="${this.width/2.5}" ry="${this.height/3}" fill="${bodyColor}" stroke="#00000020" stroke-width="1"/>`;
+        
+        // Животик (светлее основного цвета)
+        svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 15}" rx="${this.width/4}" ry="${this.height/5}" fill="${bodyColor}CC" stroke="#00000010" stroke-width="0.5"/>`;
 
-        // Eyes
+        // Голова (более детализированная)
+        svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/5}" fill="${headColor}" stroke="#00000020" stroke-width="1"/>`;
+        
+        // Щеки (если есть)
+        if (randomBool()) {
+            svg += `<circle cx="${this.width/2 - this.width/6}" cy="${this.height/4 + 2}" r="${this.width/12}" fill="#FF6B6B50"/>`;
+            svg += `<circle cx="${this.width/2 + this.width/6}" cy="${this.height/4 + 2}" r="${this.width/12}" fill="#FF6B6B50"/>`;
+        }
+
+        // Глаза (более детализированные)
         for (let i = 0; i < eyeCount; i++) {
             const eyeX = this.width/2 + (i - (eyeCount-1)/2) * 8;
-            svg += `<circle cx="${eyeX}" cy="${this.height/4 - 5}" r="3" fill="#000"/>`;
+            // Белок глаза
+            svg += `<circle cx="${eyeX}" cy="${this.height/4 - 5}" r="4" fill="#FFFFFF" stroke="#00000050" stroke-width="0.5"/>`;
+            // Зрачок
+            svg += `<circle cx="${eyeX}" cy="${this.height/4 - 5}" r="2" fill="#000000"/>`;
+            // Блик в глазу
+            svg += `<circle cx="${eyeX + 0.5}" cy="${this.height/4 - 5.5}" r="0.8" fill="#FFFFFF"/>`;
         }
 
-        // Legs
-        svg += `<rect x="${this.width/2 - 5}" y="${this.height/2 + 20}" width="3" height="15" fill="${legColor}"/>`;
-        svg += `<rect x="${this.width/2 + 2}" y="${this.height/2 + 20}" width="3" height="15" fill="${legColor}"/>`;
+        // Рот (разные варианты)
+        const mouthType = Math.floor(Math.random() * 3);
+        if (mouthType === 0) {
+            // Улыбка
+            svg += `<path d="M ${this.width/2 - 5} ${this.height/4 + 5} Q ${this.width/2} ${this.height/4 + 8} ${this.width/2 + 5} ${this.height/4 + 5}" stroke="#00000070" stroke-width="1" fill="none"/>`;
+        } else if (mouthType === 1) {
+            // Открытый рот
+            svg += `<ellipse cx="${this.width/2}" cy="${this.height/4 + 7}" rx="4" ry="3" fill="#00000070"/>`;
+        } else {
+            // Нейтральный рот
+            svg += `<line x1="${this.width/2 - 4}" y1="${this.height/4 + 6}" x2="${this.width/2 + 4}" y2="${this.height/4 + 6}" stroke="#00000070" stroke-width="1"/>`;
+        }
 
+        // Ноги (более детализированные)
+        // Левая нога
+        svg += `<rect x="${this.width/2 - 7}" y="${this.height/2 + 20}" width="4" height="15" rx="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
+        svg += `<ellipse cx="${this.width/2 - 5}" cy="${this.height/2 + 35}" rx="3" ry="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
+        
+        // Правая нога
+        svg += `<rect x="${this.width/2 + 3}" y="${this.height/2 + 20}" width="4" height="15" rx="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
+        svg += `<ellipse cx="${this.width/2 + 5}" cy="${this.height/2 + 35}" rx="3" ry="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
+
+        // Руки (если есть)
+        if (randomBool()) {
+            // Левая рука
+            svg += `<rect x="${this.width/2 - this.width/2.5}" y="${this.height/2 + 5}" width="3" height="12" rx="1.5" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
+            svg += `<circle cx="${this.width/2 - this.width/2.5 + 1.5}" cy="${this.height/2 + 18}" r="2" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
+            
+            // Правая рука
+            svg += `<rect x="${this.width/2 + this.width/2.5 - 3}" y="${this.height/2 + 5}" width="3" height="12" rx="1.5" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
+            svg += `<circle cx="${this.width/2 + this.width/2.5 - 1.5}" cy="${this.height/2 + 18}" r="2" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
+        }
+
+        // Крылья (более детализированные)
         if (hasWings) {
-            // Wings (triangles)
-            svg += `<polygon points="${this.width/2 - 15},${this.height/2} ${this.width/2 - 5},${this.height/2 - 10} ${this.width/2 - 5},${this.height/2 + 10}" fill="${wingColor}"/>`;
-            svg += `<polygon points="${this.width/2 + 5},${this.height/2} ${this.width/2 + 15},${this.height/2 - 10} ${this.width/2 + 5},${this.height/2 + 10}" fill="${wingColor}"/>`;
+            // Левое крыло
+            svg += `<path d="M ${this.width/2 - 15} ${this.height/2} Q ${this.width/2 - 25} ${this.height/2 - 5} ${this.width/2 - 15} ${this.height/2 - 10} Q ${this.width/2 - 10} ${this.height/2 - 5} ${this.width/2 - 5} ${this.height/2}" fill="${wingColor}" stroke="#00000020" stroke-width="0.5"/>`;
+            // Правое крыло
+            svg += `<path d="M ${this.width/2 + 15} ${this.height/2} Q ${this.width/2 + 25} ${this.height/2 - 5} ${this.width/2 + 15} ${this.height/2 - 10} Q ${this.width/2 + 10} ${this.height/2 - 5} ${this.width/2 + 5} ${this.height/2}" fill="${wingColor}" stroke="#00000020" stroke-width="0.5"/>`;
         }
 
+        // Хвост (если есть)
+        if (hasTail) {
+            const tailType = Math.floor(Math.random() * 3);
+            if (tailType === 0) {
+                // Прямой хвост
+                svg += `<rect x="${this.width/2 + this.width/3}" y="${this.height/2 + 5}" width="15" height="5" rx="2.5" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
+            } else if (tailType === 1) {
+                // Изогнутый хвост
+                svg += `<path d="M ${this.width/2 + this.width/3} ${this.height/2 + 7} Q ${this.width/2 + this.width/3 + 10} ${this.height/2 + 2} ${this.width/2 + this.width/3 + 15} ${this.height/2 + 7}" stroke="${bodyColor}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+            } else {
+                // Пушистый хвост
+                for (let i = 0; i < 5; i++) {
+                    const tailY = this.height/2 + 5 + (i - 2) * 2;
+                    const tailLength = 10 + Math.random() * 5;
+                    svg += `<line x1="${this.width/2 + this.width/3}" y1="${tailY}" x2="${this.width/2 + this.width/3 + tailLength}" y2="${tailY + (Math.random() - 0.5) * 4}" stroke="${bodyColor}" stroke-width="2" stroke-linecap="round"/>`;
+                }
+            }
+        }
+
+        // Шипы (более детализированные)
         if (hasSpikes) {
-            // Spikes on back
             for (let i = 0; i < 3; i++) {
                 const spikeX = this.width/2 + (i - 1) * 8;
-                svg += `<polygon points="${spikeX-2},${this.height/2 - 5} ${spikeX},${this.height/2 - 15} ${spikeX+2},${this.height/2 - 5}" fill="${randomColor()}"/>`;
+                const spikeColor = randomColor();
+                svg += `<path d="M ${spikeX-2} ${this.height/2 - 5} L ${spikeX} ${this.height/2 - 15} L ${spikeX+2} ${this.height/2 - 5} Z" fill="${spikeColor}" stroke="#00000030" stroke-width="0.5"/>`;
+            }
+        }
+        
+        // Антенны (если есть)
+        if (hasAntenna) {
+            const antennaCount = Math.floor(Math.random() * 2) + 1; // 1-2 антенны
+            for (let i = 0; i < antennaCount; i++) {
+                const antennaX = this.width/2 + (i - (antennaCount-1)/2) * 6;
+                svg += `<line x1="${antennaX}" y1="${this.height/4 - this.width/6}" x2="${antennaX}" y2="${this.height/4 - this.width/6 - 8}" stroke="#00000050" stroke-width="1.5" stroke-linecap="round"/>`;
+                svg += `<circle cx="${antennaX}" cy="${this.height/4 - this.width/6 - 8}" r="2" fill="${randomColor()}" stroke="#00000030" stroke-width="0.5"/>`;
             }
         }
 
