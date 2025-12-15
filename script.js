@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreElement = document.getElementById('final-score');
     const gameArea = document.getElementById('game-area');
     const player = document.getElementById('player');
+    
+    // Элементы параллакс-фона
+    const layer1 = document.getElementById('layer-1');
+    const layer2 = document.getElementById('layer-2');
+    const layer3 = document.getElementById('layer-3');
+    
+    // Элементы земли
+    const ground1 = document.getElementById('ground-1');
+    const ground2 = document.getElementById('ground-2');
 
     // Игровые переменные
     let isJumping = false;
@@ -25,6 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let cloudTimer;
     let scoreTimer;
     let difficultyTimer;
+    
+    // Позиции фоновых слоев
+    let layer1Position = 0;
+    let layer2Position = 0;
+    let layer3Position = 0;
+    let ground1Position = 0;
+    let ground2Position = 0;
 
     // Случайные параметры для генерации мира
     let obstacleTypes = ['ground', 'air'];
@@ -32,10 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let minObstacleFrequency = 800; // Минимальная частота
     let cloudFrequency = 3000;
 
-    // Создаем землю
-    const ground = document.createElement('div');
-    ground.id = 'ground';
-    gameArea.appendChild(ground);
+    // Старая земля заменена на параллакс-элементы в HTML
 
     // Функция создания облаков
     function createCloud() {
@@ -131,6 +144,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Функция обновления игры
     function updateGame() {
         if (!gameRunning) return;
+        
+        // Анимация параллакс-фона
+        layer1Position -= gameSpeed * 0.2;
+        layer2Position -= gameSpeed * 0.5;
+        layer3Position -= gameSpeed * 0.8;
+        
+        // Сброс позиций фонов при достижении конца
+        if (layer1Position <= -100) layer1Position = 0;
+        if (layer2Position <= -100) layer2Position = 0;
+        if (layer3Position <= -100) layer3Position = 0;
+        
+        // Применяем позиции к слоям
+        layer1.style.backgroundPosition = `${layer1Position}px 0`;
+        layer2.style.backgroundPosition = `${layer2Position}px 0`;
+        layer3.style.backgroundPosition = `${layer3Position}px 0`;
+        
+        // Анимация земли
+        ground1Position -= gameSpeed;
+        ground2Position -= gameSpeed;
+        
+        // Сброс позиций земли при достижении конца
+        if (ground1Position <= -100) ground1Position = 0;
+        if (ground2Position <= -100) ground2Position = 0;
+        
+        // Применяем позиции к земле
+        ground1.style.left = `${ground1Position}px`;
+        ground2.style.left = `${ground2Position}px`;
 
         // Перемещаем препятствия
         obstacles = obstacles.filter(obstacle => {
@@ -164,6 +204,20 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreElement.textContent = score;
         playerBottom = 100;
         player.style.bottom = `${playerBottom}px`;
+        
+        // Сброс позиций фонов
+        layer1Position = 0;
+        layer2Position = 0;
+        layer3Position = 0;
+        ground1Position = 0;
+        ground2Position = 0;
+        
+        // Применяем начальные позиции
+        layer1.style.backgroundPosition = '0px 0';
+        layer2.style.backgroundPosition = '0px 0';
+        layer3.style.backgroundPosition = '0px 0';
+        ground1.style.left = '0px';
+        ground2.style.left = '100%';
 
         // Очистка старых препятствий и облаков
         obstacles.forEach(obstacle => obstacle.remove());
@@ -232,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Добавляем управление прыжком (клик/тап по экрану)
     document.addEventListener('click', (e) => {
         // Исключаем клики по кнопкам
-        if (e.target !== startButton && e.target !== restartButton) {
+        if (!e.target.closest('button')) {
             jump();
         }
     });
@@ -248,11 +302,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Добавляем поддержку сенсорного управления для мобильных устройств
     document.addEventListener('touchstart', (e) => {
         // Исключаем касания по кнопкам
-        if (e.target !== startButton && e.target !== restartButton) {
+        if (!e.target.closest('button')) {
             e.preventDefault();
             jump();
         }
-    });
+    }, { passive: false });
 
     // Обнаружение Telegram WebApp API для интеграции с Telegram
     if (window.Telegram && window.Telegram.WebApp) {
