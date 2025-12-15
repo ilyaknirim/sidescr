@@ -289,7 +289,17 @@ function showGameOver() {
 
     // Text-to-speech
     if ('speechSynthesis' in window) {
+        // Отменяем все предыдущие utterances, чтобы избежать наложения
+        window.speechSynthesis.cancel();
+        
+        // Создаем новый utterance с настройками для русского языка
         const utterance = new SpeechSynthesisUtterance(randomText);
+        utterance.lang = 'ru-RU';
+        utterance.rate = 0.9; // Немного замедляем темп для лучшего восприятия
+        utterance.pitch = 1; // Стандартный тон
+        utterance.volume = 1; // Максимальная громкость
+        
+        // Произносим фразу
         window.speechSynthesis.speak(utterance);
     }
 }
