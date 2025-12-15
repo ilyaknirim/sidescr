@@ -10,6 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.getElementById('game-area');
     const player = document.getElementById('player');
     
+    // Проверка наличия всех необходимых элементов
+    if (!startScreen || !gameScreen || !gameOverScreen || !startButton || 
+        !restartButton || !scoreElement || !finalScoreElement || 
+        !gameArea || !player) {
+        console.error("Ошибка: не удалось найти один или несколько необходимых элементов DOM");
+        return;
+    }
+    
     // Элементы параллакс-фона
     const layer1 = document.getElementById('layer-1');
     const layer2 = document.getElementById('layer-2');
@@ -18,6 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Элементы земли
     const ground1 = document.getElementById('ground-1');
     const ground2 = document.getElementById('ground-2');
+    
+    // Проверка наличия всех элементов фона и земли
+    if (!layer1 || !layer2 || !layer3 || !ground1 || !ground2) {
+        console.error("Ошибка: не удалось найти элементы фона или земли");
+    }
 
     // Игровые переменные
     let isJumping = false;
@@ -100,23 +113,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function jump() {
         if (!isJumping && gameRunning) {
             isJumping = true;
-            let jumpCount = 0;
-
-            const jumpInterval = setInterval(() => {
+            playerBottom = 100;
+            jumpPower = -12;
+            
+            const jumpAnimation = () => {
                 playerBottom += jumpPower;
                 player.style.bottom = `${playerBottom}px`;
                 jumpPower += gravity;
-                jumpCount++;
-
+                
                 // Ограничение высоты прыжка
                 if (playerBottom <= 100) {
                     playerBottom = 100;
                     player.style.bottom = `${playerBottom}px`;
-                    clearInterval(jumpInterval);
                     isJumping = false;
-                    jumpPower = -12; // Сброс силы прыжка
+                } else {
+                    requestAnimationFrame(jumpAnimation);
                 }
-            }, 20);
+            };
+            
+            requestAnimationFrame(jumpAnimation);
         }
     }
 
@@ -213,11 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ground2Position = 0;
         
         // Применяем начальные позиции
-        layer1.style.backgroundPosition = '0px 0';
-        layer2.style.backgroundPosition = '0px 0';
-        layer3.style.backgroundPosition = '0px 0';
-        ground1.style.left = '0px';
-        ground2.style.left = '100%';
+        if (layer1) layer1.style.backgroundPosition = '0px 0';
+        if (layer2) layer2.style.backgroundPosition = '0px 0';
+        if (layer3) layer3.style.backgroundPosition = '0px 0';
+        if (ground1) ground1.style.left = '0px';
+        if (ground2) ground2.style.left = '100%';
 
         // Очистка старых препятствий и облаков
         obstacles.forEach(obstacle => obstacle.remove());
@@ -283,10 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
     startButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', startGame);
 
-    // Добавляем управление прыжком (клик/тап по экрану)
-    document.addEventListener('click', (e) => {
-        // Исключаем клики по кнопкам
-        if (!e.target.closest('button')) {
+    // Добавляем управление прыжком (клик/тап по игровой области)
+    gameArea.addEventListener('click', (e) => {
+        if (gameRunning) {
+            e.preventDefault();
             jump();
         }
     });
@@ -300,13 +315,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Добавляем поддержку сенсорного управления для мобильных устройств
-    document.addEventListener('touchstart', (e) => {
-        // Исключаем касания по кнопкам
-        if (!e.target.closest('button')) {
+    gameArea.addEventListener('touchstart', (e) => {
+        if (gameRunning) {
             e.preventDefault();
             jump();
         }
     }, { passive: false });
+    
+    // Добавляем дополнительную обработку для некоторых мобильных браузеров
+    gameArea.addEventListener('touchend', (e) => {
+        if (gameRunning) {
+            e.preventDefault();
+            jump();
+        }
+    }, { passive: false });
+    
+    // Добавляем обработку для Pointer Events (современный стандарт)
+    gameArea.addEventListener('pointerdown', (e) => {
+        if (gameRunning) {
+            e.preventDefault();
+            jump();
+        }
+    });
 
     // Обнаружение Telegram WebApp API для интеграции с Telegram
     if (window.Telegram && window.Telegram.WebApp) {
