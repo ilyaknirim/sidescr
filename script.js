@@ -17,6 +17,15 @@ let gravity = 0.5;
 let jumpStrength = -10;
 let gameOverTexts = [];
 
+// Стандартные фразы для проигрыша
+const DEFAULT_GAME_OVER_TEXTS = [
+    "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
+    "Упс, игра окончена! Но ты был близок к рекорду.",
+    "Не расстраивайся, следующий раз повезет больше.",
+    "Игра окончена, но опыт получен! Продолжай тренироваться.",
+    "Ты справился отлично, но в этот раз не повезло."
+];
+
 // Procedural generation functions
 function randomColor() {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
@@ -63,13 +72,13 @@ class Character {
 
         // Тело (более детализированное)
         svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 10}" rx="${this.width/2.5}" ry="${this.height/3}" fill="${bodyColor}" stroke="#00000020" stroke-width="1"/>`;
-        
+
         // Животик (светлее основного цвета)
         svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 15}" rx="${this.width/4}" ry="${this.height/5}" fill="${bodyColor}CC" stroke="#00000010" stroke-width="0.5"/>`;
 
         // Голова (более детализированная)
         svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/5}" fill="${headColor}" stroke="#00000020" stroke-width="1"/>`;
-        
+
         // Щеки (если есть)
         if (randomBool()) {
             svg += `<circle cx="${this.width/2 - this.width/6}" cy="${this.height/4 + 2}" r="${this.width/12}" fill="#FF6B6B50"/>`;
@@ -104,7 +113,7 @@ class Character {
         // Левая нога
         svg += `<rect x="${this.width/2 - 7}" y="${this.height/2 + 20}" width="4" height="15" rx="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
         svg += `<ellipse cx="${this.width/2 - 5}" cy="${this.height/2 + 35}" rx="3" ry="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
-        
+
         // Правая нога
         svg += `<rect x="${this.width/2 + 3}" y="${this.height/2 + 20}" width="4" height="15" rx="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
         svg += `<ellipse cx="${this.width/2 + 5}" cy="${this.height/2 + 35}" rx="3" ry="2" fill="${legColor}" stroke="#00000020" stroke-width="0.5"/>`;
@@ -114,7 +123,7 @@ class Character {
             // Левая рука
             svg += `<rect x="${this.width/2 - this.width/2.5}" y="${this.height/2 + 5}" width="3" height="12" rx="1.5" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
             svg += `<circle cx="${this.width/2 - this.width/2.5 + 1.5}" cy="${this.height/2 + 18}" r="2" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
-            
+
             // Правая рука
             svg += `<rect x="${this.width/2 + this.width/2.5 - 3}" y="${this.height/2 + 5}" width="3" height="12" rx="1.5" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
             svg += `<circle cx="${this.width/2 + this.width/2.5 - 1.5}" cy="${this.height/2 + 18}" r="2" fill="${bodyColor}" stroke="#00000020" stroke-width="0.5"/>`;
@@ -155,7 +164,7 @@ class Character {
                 svg += `<path d="M ${spikeX-2} ${this.height/2 - 5} L ${spikeX} ${this.height/2 - 15} L ${spikeX+2} ${this.height/2 - 5} Z" fill="${spikeColor}" stroke="#00000030" stroke-width="0.5"/>`;
             }
         }
-        
+
         // Антенны (если есть)
         if (hasAntenna) {
             const antennaCount = Math.floor(Math.random() * 2) + 1; // 1-2 антенны
@@ -214,80 +223,96 @@ class Obstacle {
     }
 
     generateSVG() {
-        const objectTypes = ['tree', 'rock', 'cloud', 'house', 'car', 'animal'];
-        const objectType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+        const objectTypes = ['tree', 'rock', 'cloud', 'house', 'car', 'animal', 'mushroom', 'flower'];
+        const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+        const color = randomColor();
 
         let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
 
-        const color1 = randomColor();
-        const color2 = randomColor();
-        const color3 = randomColor();
-
-        switch (objectType) {
+        switch(type) {
             case 'tree':
-                // Unusual tree: with fruits or flowers
-                svg += `<rect x="${this.width/2 - 5}" y="${this.height - 20}" width="10" height="20" fill="#8B4513"/>`;
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2}" ry="${this.height/2}" fill="${color1}"/>`;
-                // Add unusual elements: eyes or mouth
-                svg += `<circle cx="${this.width/2 - 5}" cy="${this.height/2 - 10}" r="3" fill="#000"/>`;
-                svg += `<circle cx="${this.width/2 + 5}" cy="${this.height/2 - 10}" r="3" fill="#000"/>`;
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 5}" rx="4" ry="2" fill="#000"/>`;
+                // Ствол
+                svg += `<rect x="${this.width/2 - this.width/6}" y="${this.height/2}" width="${this.width/3}" height="${this.height/2}" fill="#8B4513" stroke="#00000030" stroke-width="1"/>`;
+                // Крона
+                svg += `<circle cx="${this.width/2}" cy="${this.height/3}" r="${this.width/2.5}" fill="#228B22" stroke="#00000030" stroke-width="1"/>`;
                 break;
+
             case 'rock':
-                // Unusual rock: with crystals or faces
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2}" ry="${this.height/2}" fill="${color1}"/>`;
-                // Add crystals
-                for (let i = 0; i < 3; i++) {
-                    const cx = this.width/2 + (Math.random() - 0.5) * this.width/2;
-                    const cy = this.height/2 + (Math.random() - 0.5) * this.height/2;
-                    svg += `<polygon points="${cx-3},${cy+5} ${cx},${cy-5} ${cx+3},${cy+5}" fill="${color2}"/>`;
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2}" ry="${this.height/2}" fill="#808080" stroke="#00000030" stroke-width="1"/>`;
+                // Трещины
+                svg += `<line x1="${this.width/3}" y1="${this.height/3}" x2="${this.width/2}" y2="${this.height/1.5}" stroke="#606060" stroke-width="1"/>`;
+                svg += `<line x1="${this.width/1.5}" y1="${this.height/3}" x2="${this.width/2}" y2="${this.height/1.5}" stroke="#606060" stroke-width="1"/>`;
+                break;
+
+            case 'cloud':
+                // Облако из нескольких кругов
+                svg += `<circle cx="${this.width/3}" cy="${this.height/2}" r="${this.width/3}" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>`;
+                svg += `<circle cx="${this.width/1.5}" cy="${this.height/2}" r="${this.width/3}" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>`;
+                svg += `<circle cx="${this.width/2}" cy="${this.height/2.5}" r="${this.width/2.5}" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>`;
+                break;
+
+            case 'house':
+                // Основание дома
+                svg += `<rect x="${this.width/6}" y="${this.height/2}" width="${this.width*2/3}" height="${this.height/2}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                // Крыша
+                svg += `<path d="M ${this.width/6} ${this.height/2} L ${this.width/2} ${this.height/4} L ${this.width*5/6} ${this.height/2} Z" fill="#8B0000" stroke="#00000030" stroke-width="1"/>`;
+                // Окно
+                svg += `<rect x="${this.width/2 - this.width/8}" y="${this.height/2 + this.height/8}" width="${this.width/4}" height="${this.width/4}" fill="#87CEEB" stroke="#00000030" stroke-width="1"/>`;
+                // Дверь
+                svg += `<rect x="${this.width/2 - this.width/12}" y="${this.height/2 + this.height/3}" width="${this.width/6}" height="${this.height/6}" fill="#654321" stroke="#00000030" stroke-width="1"/>`;
+                break;
+
+            case 'car':
+                // Корпус
+                svg += `<rect x="${this.width/6}" y="${this.height/2.5}" width="${this.width*2/3}" height="${this.height/3}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                // Кабина
+                svg += `<rect x="${this.width/3}" y="${this.height/4}" width="${this.width/3}" height="${this.height/6}" fill="#87CEEB" stroke="#00000030" stroke-width="1"/>`;
+                // Колеса
+                svg += `<circle cx="${this.width/3}" cy="${this.height*5/6}" r="${this.height/10}" fill="#000000" stroke="#333333" stroke-width="1"/>`;
+                svg += `<circle cx="${this.width*2/3}" cy="${this.height*5/6}" r="${this.height/10}" fill="#000000" stroke="#333333" stroke-width="1"/>`;
+                break;
+
+            case 'animal':
+                // Тело
+                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/2.5}" ry="${this.height/3}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                // Голова
+                svg += `<circle cx="${this.width/4}" cy="${this.height/2.5}" r="${this.width/5}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                // Ноги
+                svg += `<rect x="${this.width/3}" y="${this.height/2 + this.height/6}" width="${this.width/10}" height="${this.height/4}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                svg += `<rect x="${this.width/2}" y="${this.height/2 + this.height/6}" width="${this.width/10}" height="${this.height/4}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                // Хвост
+                svg += `<path d="M ${this.width*3/4} ${this.height/2} Q ${this.width*5/6} ${this.height/2.5} ${this.width*9/10} ${this.height/2}" stroke="${color}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+                break;
+
+            case 'mushroom':
+                // Ножка
+                svg += `<rect x="${this.width/2 - this.width/8}" y="${this.height/2}" width="${this.width/4}" height="${this.height/2}" fill="#F5DEB3" stroke="#00000030" stroke-width="1"/>`;
+                // Шляпка
+                svg += `<path d="M ${this.width/6} ${this.height/2} Q ${this.width/2} ${this.height/4} ${this.width*5/6} ${this.height/2} Z" fill="#FF4500" stroke="#00000030" stroke-width="1"/>`;
+                // Кружки на шляпке
+                for (let i = 0; i < 5; i++) {
+                    const spotX = this.width/3 + Math.random() * this.width/3;
+                    const spotY = this.height/3 + Math.random() * this.height/6;
+                    const spotSize = this.width/20 + Math.random() * this.width/20;
+                    svg += `<circle cx="${spotX}" cy="${spotY}" r="${spotSize}" fill="#FFFFFF" stroke="#00000010" stroke-width="0.5"/>`;
                 }
                 break;
-            case 'cloud':
-                // Unusual cloud: with faces or lightning
-                svg += `<ellipse cx="${this.width/3}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
-                svg += `<ellipse cx="${2*this.width/3}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
-                // Add face
-                svg += `<circle cx="${this.width/2 - 10}" cy="${this.height/2 - 5}" r="2" fill="#000"/>`;
-                svg += `<circle cx="${this.width/2 + 10}" cy="${this.height/2 - 5}" r="2" fill="#000"/>`;
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2 + 5}" rx="3" ry="1" fill="#000"/>`;
-                break;
-            case 'house':
-                // Unusual house: floating or with weird features
-                svg += `<rect x="${this.width/4}" y="${this.height/2}" width="${this.width/2}" height="${this.height/2}" fill="${color1}"/>`;
-                svg += `<polygon points="${this.width/4},${this.height/2} ${this.width/2},${this.height/4} ${3*this.width/4},${this.height/2}" fill="${color2}"/>`;
-                // Add windows with eyes
-                svg += `<rect x="${this.width/3}" y="${this.height/2 + 10}" width="8" height="8" fill="#87CEEB"/>`;
-                svg += `<circle cx="${this.width/3 + 2}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
-                svg += `<circle cx="${this.width/3 + 6}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
-                svg += `<rect x="${this.width/2 + 5}" y="${this.height/2 + 10}" width="8" height="8" fill="#87CEEB"/>`;
-                svg += `<circle cx="${this.width/2 + 7}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
-                svg += `<circle cx="${this.width/2 + 11}" cy="${this.height/2 + 12}" r="1" fill="#000"/>`;
-                break;
-            case 'car':
-                // Unusual car: with animal features
-                svg += `<rect x="${this.width/6}" y="${this.height/2}" width="${2*this.width/3}" height="${this.height/3}" fill="${color1}"/>`;
-                svg += `<ellipse cx="${this.width/6}" cy="${this.height - 10}" rx="8" ry="5" fill="#000"/>`;
-                svg += `<ellipse cx="${5*this.width/6}" cy="${this.height - 10}" rx="8" ry="5" fill="#000"/>`;
-                // Add headlights with eyes
-                svg += `<circle cx="${this.width/6 - 5}" cy="${this.height/2 + 5}" r="3" fill="#FFFF00"/>`;
-                svg += `<circle cx="${5*this.width/6 + 5}" cy="${this.height/2 + 5}" r="3" fill="#FFFF00"/>`;
-                svg += `<circle cx="${this.width/6 - 5}" cy="${this.height/2 + 5}" r="1" fill="#000"/>`;
-                svg += `<circle cx="${5*this.width/6 + 5}" cy="${this.height/2 + 5}" r="1" fill="#000"/>`;
-                break;
-            case 'animal':
-                // Unusual animal: mix of features
-                svg += `<ellipse cx="${this.width/2}" cy="${this.height/2}" rx="${this.width/3}" ry="${this.height/3}" fill="${color1}"/>`;
-                svg += `<circle cx="${this.width/2}" cy="${this.height/4}" r="${this.width/8}" fill="${color2}"/>`;
-                // Legs
-                svg += `<rect x="${this.width/2 - 8}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
-                svg += `<rect x="${this.width/2 - 3}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
-                svg += `<rect x="${this.width/2 + 2}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
-                svg += `<rect x="${this.width/2 + 7}" y="${this.height/2 + 10}" width="3" height="15" fill="${color3}"/>`;
-                // Eyes
-                svg += `<circle cx="${this.width/2 - 5}" cy="${this.height/4 - 3}" r="2" fill="#000"/>`;
-                svg += `<circle cx="${this.width/2 + 5}" cy="${this.height/4 - 3}" r="2" fill="#000"/>`;
+
+            case 'flower':
+                // Стебель
+                svg += `<rect x="${this.width/2 - this.width/20}" y="${this.height/2}" width="${this.width/10}" height="${this.height/2}" fill="#228B22" stroke="#00000030" stroke-width="1"/>`;
+                // Листья
+                svg += `<ellipse cx="${this.width/3}" cy="${this.height*2/3}" rx="${this.width/8}" ry="${this.height/12}" fill="#228B22" stroke="#00000030" stroke-width="1"/>`;
+                svg += `<ellipse cx="${this.width*2/3}" cy="${this.height*2/3}" rx="${this.width/8}" ry="${this.height/12}" fill="#228B22" stroke="#00000030" stroke-width="1"/>`;
+                // Лепестки
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i * 60) * Math.PI / 180;
+                    const petalX = this.width/2 + Math.cos(angle) * this.width/4;
+                    const petalY = this.height/3 + Math.sin(angle) * this.height/6;
+                    svg += `<circle cx="${petalX}" cy="${petalY}" r="${this.width/6}" fill="${color}" stroke="#00000030" stroke-width="1"/>`;
+                }
+                // Центр цветка
+                svg += `<circle cx="${this.width/2}" cy="${this.height/3}" r="${this.width/8}" fill="#FFFF00" stroke="#00000030" stroke-width="1"/>`;
                 break;
         }
 
@@ -308,48 +333,108 @@ class Obstacle {
     }
 }
 
-// Background layers for parallax
-class BackgroundLayer {
-    constructor(speed, color, height) {
-        this.speed = speed;
-        this.color = color;
-        this.height = height;
-        this.x = 0;
+// Background elements
+class BackgroundElement {
+    constructor() {
+        this.x = canvas.width + randomSize(50, 200);
+        this.y = randomSize(0, canvas.height - 200);
+        this.width = randomSize(30, 100);
+        this.height = randomSize(20, 80);
+        this.speed = randomSize(0.5, 1.5);
+        this.type = Math.random() > 0.5 ? 'cloud' : 'tree';
+        this.color = this.type === 'cloud' ? '#FFFFFF' : randomColor();
+        this.svg = this.generateSVG();
+        this.image = new Image();
+        this.image.src = 'data:image/svg+xml;base64,' + btoa(this.svg);
+    }
+
+    generateSVG() {
+        let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+
+        if (this.type === 'cloud') {
+            // Облако из нескольких кругов
+            svg += `<circle cx="${this.width/3}" cy="${this.height/2}" r="${this.width/3}" fill="${this.color}" stroke="#E0E0E0" stroke-width="1" opacity="0.8"/>`;
+            svg += `<circle cx="${this.width*2/3}" cy="${this.height/2}" r="${this.width/3}" fill="${this.color}" stroke="#E0E0E0" stroke-width="1" opacity="0.8"/>`;
+            svg += `<circle cx="${this.width/2}" cy="${this.height/3}" r="${this.width/2.5}" fill="${this.color}" stroke="#E0E0E0" stroke-width="1" opacity="0.8"/>`;
+        } else {
+            // Простое дерево
+            // Ствол
+            svg += `<rect x="${this.width/2 - this.width/8}" y="${this.height/2}" width="${this.width/4}" height="${this.height/2}" fill="#8B4513" stroke="#00000030" stroke-width="1"/>`;
+            // Крона
+            svg += `<circle cx="${this.width/2}" cy="${this.height/3}" r="${this.width/2.5}" fill="${this.color}" stroke="#00000030" stroke-width="1" opacity="0.8"/>`;
+        }
+
+        svg += '</svg>';
+        return svg;
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, canvas.height - this.height, canvas.width, this.height);
-        ctx.fillRect(this.x + canvas.width, canvas.height - this.height, canvas.width, this.height);
+        if (this.image.complete) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            this.image.onload = () => ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
     }
 
     update() {
         this.x -= this.speed;
-        if (this.x <= -canvas.width) {
-            this.x = 0;
+
+        // Если элемент ушел за экран, создаем новый
+        if (this.x + this.width < 0) {
+            this.x = canvas.width + randomSize(50, 200);
+            this.y = randomSize(0, canvas.height - 200);
         }
     }
 }
 
-// Game objects
+// Initialize game objects
 let character = new Character();
 let obstacles = [];
-let backgroundLayers = [
-    new BackgroundLayer(0.2, '#87CEEB', canvas.height), // Sky
-    new BackgroundLayer(1, '#228B22', 50),   // Distant hills
-    new BackgroundLayer(0.5, '#98FB98', 100) // Grass
-];
+let backgroundElements = [];
+let frameCount = 0;
 
-// Generate obstacles
-function generateObstacle() {
-    if (Math.random() < 0.02) { // Low probability
-        obstacles.push(new Obstacle(canvas.width));
-    }
+// Create initial background elements
+for (let i = 0; i < 5; i++) {
+    const element = new BackgroundElement();
+    element.x = randomSize(0, canvas.width);
+    backgroundElements.push(element);
 }
 
-// Collision detection
-function checkCollision() {
-    for (let obs of obstacles) {
+// Game loop
+function gameLoop() {
+    if (!gameRunning) return;
+
+    // Clear canvas
+    ctx.fillStyle = '#87CEEB'; // Sky blue background
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw ground
+    ctx.fillStyle = '#8FBC8F'; // Forest green ground
+    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+
+    // Draw and update background elements
+    backgroundElements.forEach(element => {
+        element.update();
+        element.draw();
+    });
+
+    // Draw and update character
+    character.update();
+    character.draw();
+
+    // Create new obstacles
+    frameCount++;
+    if (frameCount % 100 === 0) {
+        obstacles.push(new Obstacle(canvas.width));
+    }
+
+    // Draw and update obstacles
+    obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+    obstacles.forEach(obs => {
+        obs.update();
+        obs.draw();
+
+        // Check collision
         if (character.x < obs.x + obs.width &&
             character.x + character.width > obs.x &&
             character.y < obs.y + obs.height &&
@@ -357,85 +442,154 @@ function checkCollision() {
             gameRunning = false;
             showGameOver();
         }
+    });
+
+    // Update score
+    score += 0.01;
+
+    // Increase difficulty over time
+    if (frameCount % 500 === 0 && speed < 8) {
+        speed += 0.5;
     }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Функция для загрузки текстов из файла
+function loadGameOverTexts() {
+    return fetch('texts.txt')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            // Разделяем текст на строки и фильтруем пустые
+            gameOverTexts = text.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '');
+
+            console.log(`Loaded ${gameOverTexts.length} texts from file`);
+            return true;
+        })
+        .catch(error => {
+            console.error('Error loading texts:', error);
+            // В случае ошибки используем стандартные фразы
+            gameOverTexts = [...DEFAULT_GAME_OVER_TEXTS];
+            console.log('Using default game over texts due to error');
+            return false;
+        });
 }
 
 // Show game over modal
 function showGameOver() {
-    const randomText = gameOverTexts[Math.floor(Math.random() * gameOverTexts.length)];
+    // Проверяем, есть ли загруженные тексты
+    if (!gameOverTexts || gameOverTexts.length === 0) {
+        console.warn('Game over texts not loaded yet, attempting to load them');
+        // Если тексты не загружены, пытаемся их загрузить
+        fetch('texts.txt')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                // Разделяем текст на строки и фильтруем пустые
+                gameOverTexts = text.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line !== '');
+
+                console.log(`Loaded ${gameOverTexts.length} texts from file`);
+
+                // После загрузки текстов показываем модальное окно
+                showGameOverModal();
+            })
+            .catch(error => {
+                console.error('Error loading texts:', error);
+                // В случае ошибки используем стандартные фразы
+                gameOverTexts = [
+                    "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
+                    "Упс, игра окончена! Но ты был близок к рекорду.",
+                    "Не расстраивайся, следующий раз повезет больше.",
+                    "Игра окончена, но опыт получен! Продолжай тренироваться.",
+                    "Ты справился отлично, но в этот раз не повезло."
+                ];
+                console.log('Using default game over texts due to error');
+
+                // Показываем модальное окно со стандартными фразами
+                showGameOverModal();
+            });
+    } else {
+        console.log(`Using ${gameOverTexts.length} loaded texts from file`);
+        // Если тексты уже загружены, просто показываем модальное окно
+        showGameOverModal();
+    }
+}
+
+// Функция для отображения модального окна с текстом проигрыша
+function showGameOverModal() {
+    const randomIndex = Math.floor(Math.random() * gameOverTexts.length);
+    const randomText = gameOverTexts[randomIndex];
+    console.log(`Selected text #${randomIndex}: "${randomText}"`);
+
     document.getElementById('gameOverText').textContent = randomText;
-    document.getElementById('gameOverScore').textContent = 'Score: ' + Math.floor(score);
+    document.getElementById('gameOverScore').textContent = 'Счет: ' + Math.floor(score);
     document.getElementById('gameOverModal').style.display = 'flex';
 
     // Text-to-speech
     if ('speechSynthesis' in window) {
         // Отменяем все предыдущие utterances, чтобы избежать наложения
         window.speechSynthesis.cancel();
-        
+
         // Создаем новый utterance с настройками для русского языка
         const utterance = new SpeechSynthesisUtterance(randomText);
         utterance.lang = 'ru-RU';
         utterance.rate = 0.9; // Немного замедляем темп для лучшего восприятия
         utterance.pitch = 1; // Стандартный тон
         utterance.volume = 1; // Максимальная громкость
-        
+
+        // Добавляем обработчики событий для отладки
+        utterance.onstart = () => console.log('Speech started for:', randomText);
+        utterance.onend = () => console.log('Speech ended successfully');
+        utterance.onerror = (event) => console.error('Speech error:', event);
+
         // Произносим фразу
         window.speechSynthesis.speak(utterance);
+    } else {
+        console.warn('Speech synthesis not supported in this browser');
     }
 }
 
 // Reset game
 function resetGame() {
-    character = new Character();
-    obstacles = [];
+    gameRunning = true;
     score = 0;
     speed = 2;
-    gameRunning = true;
+    frameCount = 0;
+    obstacles = [];
+    character = new Character();
     document.getElementById('gameOverModal').style.display = 'none';
+    gameLoop();
 }
 
-// Update game
-function update() {
-    if (!gameRunning) return;
+// Event listeners
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && gameRunning) {
+        e.preventDefault();
+        character.jump();
+    }
+});
 
-    backgroundLayers.forEach(layer => layer.update());
-    character.update();
-    obstacles.forEach(obs => obs.update());
-    obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+canvas.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!gameRunning) {
+        gameRunning = true;
+    }
+    character.jump();
+});
 
-    generateObstacle();
-    checkCollision();
-
-    score += 0.1;
-    speed += 0.001; // Gradually increase speed
-}
-
-// Draw game
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    backgroundLayers.forEach(layer => layer.draw());
-    character.draw();
-    obstacles.forEach(obs => obs.draw());
-
-    // Draw ground
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
-
-    // Draw score
-    ctx.fillStyle = '#000';
-    ctx.font = '20px Arial';
-    ctx.fillText('Score: ' + Math.floor(score), 10, 30);
-}
-
-// Game loop
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// Touch controls
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (!gameRunning) {
@@ -444,25 +598,57 @@ canvas.addEventListener('touchstart', (e) => {
     character.jump();
 });
 
-// Mouse controls for PC testing
-canvas.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    if (!gameRunning) {
-        gameRunning = true;
-    }
-    character.jump();
-});
-
-// Load game over texts
-fetch('texts.txt')
-    .then(response => response.text())
-    .then(text => {
-        gameOverTexts = text.split('\n').filter(line => line.trim() !== '');
-    })
-    .catch(error => console.error('Error loading texts:', error));
-
 // Restart button event
 document.getElementById('restartButton').addEventListener('click', resetGame);
 
-// Start game
+// Load game over texts
+console.log('Attempting to load texts.txt...');
+fetch('texts.txt')
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(text => {
+        console.log('Raw text length:', text.length);
+        console.log('Raw text preview:', text.substring(0, 100));
+
+        // Разделяем текст на строки и фильтруем пустые
+        gameOverTexts = text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line !== '');
+
+        console.log(`Processed ${gameOverTexts.length} game over texts`);
+        console.log('First few texts:', gameOverTexts.slice(0, 3));
+
+        // Если тексты не загрузились, используем стандартные фразы
+        if (gameOverTexts.length === 0) {
+            console.warn('No texts found in file, using defaults');
+            gameOverTexts = [
+                "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
+                "Упс, игра окончена! Но ты был близок к рекорду.",
+                "Не расстраивайся, следующий раз повезет больше.",
+                "Игра окончена, но опыт получен! Продолжай тренироваться.",
+                "Ты справился отлично, но в этот раз не повезло."
+            ];
+        }
+    })
+    .catch(error => {
+        console.error('Error loading texts:', error);
+        console.error('Error details:', error.message);
+
+        // В случае ошибки используем стандартные фразы
+        gameOverTexts = [
+            "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
+            "Упс, игра окончена! Но ты был близок к рекорду.",
+            "Не расстраивайся, следующий раз повезет больше.",
+            "Игра окончена, но опыт получен! Продолжай тренироваться.",
+            "Ты справился отлично, но в этот раз не повезло."
+        ];
+        console.log('Using default game over texts due to error');
+    });
+
+// Start the game
 gameLoop();
