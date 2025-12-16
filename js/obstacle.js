@@ -18,19 +18,34 @@ export class Obstacle {
     
     createImage() {
         try {
-            this.svg = this.generateSVG();
-            this.image = new Image();
-            this.image.onload = () => {
-                console.log(`Obstacle image loaded: ${this.obstacleType}`);
-            };
-            this.image.onerror = (e) => {
-                console.error('Failed to load obstacle image:', e);
-                this.createFallbackImage();
-            };
-            this.image.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(this.svg)));
-        } catch (error) {
-            console.error('Error creating obstacle image:', error);
+            // Сначала создаем запасное изображение
             this.createFallbackImage();
+
+            // Затем пытаемся создать SVG
+            try {
+                this.svg = this.generateSVG();
+                const svgImage = new Image();
+                svgImage.onload = () => {
+                    // Заменяем запасное изображение только после успешной загрузки SVG
+                    this.image = svgImage;
+                    console.log(`Obstacle SVG image loaded: ${this.obstacleType}`);
+                };
+                svgImage.onerror = (e) => {
+                    console.warn(`Failed to load obstacle SVG image (${this.obstacleType}), using fallback:`, e);
+                    // Оставляем запасное изображение
+                };
+                // Encode SVG to base64, handling Unicode characters
+                svgImage.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(this.svg)));
+            } catch (svgError) {
+                console.warn(`Error creating obstacle SVG (${this.obstacleType}), using fallback:`, svgError);
+                // Оставляем запасное изображение
+            }
+        } catch (error) {
+            console.error(`Critical error creating obstacle image (${this.obstacleType}):`, error);
+            // Гарантируем, что у нас есть хотя бы запасное изображение
+            if (!this.image) {
+                this.createFallbackImage();
+            }
         }
     }
     
