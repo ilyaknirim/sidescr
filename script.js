@@ -7,21 +7,16 @@ const JUMP_STRENGTH = -10;
 const INITIAL_SPEED = 2;
 const MAX_SPEED = 8;
 const GROUND_HEIGHT = 100;
-const DEFAULT_TEXTS = [
-    "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
-    "Упс, игра окончена! Но ты был близок к рекорду.",
-    "Не расстраивайся, следующий раз повезет больше.",
-    "Игра окончена, но опыт получен! Продолжай тренироваться.",
-    "Ты справился отлично, но в этот раз не повезло."
-];
 
 // Game state
 let gameRunning = true;
 let score = 0;
 let speed = INITIAL_SPEED;
 let frameCount = 0;
-let gameOverTexts = [];
 let character, obstacles, backgroundElements;
+
+// Game over texts - ИНИЦИАЛИЗИРУЕМСЯ ПУСТЫМ МАССИВОМ
+let gameOverTexts = [];
 
 // Utility functions
 const random = {
@@ -347,44 +342,70 @@ function checkCollision(character, obstacle) {
            character.y + character.height > obstacle.y;
 }
 
-// Load game over texts
+// Load game over texts - ГЛАВНОЕ ИСПРАВЛЕНИЕ
 async function loadGameOverTexts() {
     try {
+        console.log('Начинаю загрузку texts.txt...');
         const response = await fetch('texts.txt');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        const text = await response.text();
-        gameOverTexts = text.split('\n')
-            .map(line => line.trim())
-            .filter(line => line !== '');
-        
-        if (gameOverTexts.length === 0) {
-            throw new Error('File is empty');
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
         }
         
-        console.log(`Loaded ${gameOverTexts.length} game over texts`);
+        const text = await response.text();
+        console.log('Файл загружен, размер:', text.length, 'символов');
+        
+        // Обработка текста
+        gameOverTexts = text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line !== '' && line.length > 0);
+        
+        console.log(`Загружено ${gameOverTexts.length} фраз`);
+        
+        if (gameOverTexts.length === 0) {
+            throw new Error('Файл пустой или содержит только пустые строки');
+        }
+        
+        // Проверка первых 3 фраз для отладки
+        console.log('Примеры загруженных фраз:');
+        gameOverTexts.slice(0, 3).forEach((phrase, i) => {
+            console.log(`${i + 1}: "${phrase.substring(0, 50)}..."`);
+        });
+        
         return true;
     } catch (error) {
-        console.error('Error loading texts:', error);
-        gameOverTexts = [...DEFAULT_TEXTS];
-        console.log('Using default texts');
+        console.error('Ошибка при загрузке texts.txt:', error);
+        
+        // Используем запасные фразы
+        gameOverTexts = [
+            "Ой, кажется, ты столкнулся с препятствием! Попробуй еще раз.",
+            "Упс, игра окончена! Но ты был близок к рекорду.",
+            "Не расстраивайся, следующий раз повезет больше.",
+            "Игра окончена, но опыт получен! Продолжай тренироваться.",
+            "Ты справился отлично, но в этот раз не повезло."
+        ];
+        
+        console.log('Использую стандартные фразы, количество:', gameOverTexts.length);
         return false;
     }
 }
 
-// Show game over
+// Show game over - УПРОЩЕННАЯ ВЕРСИЯ
 function showGameOver() {
-    // Ensure we have texts loaded
-    if (gameOverTexts.length === 0) {
-        console.warn('No texts loaded, using defaults');
-        gameOverTexts = [...DEFAULT_TEXTS];
+    // Проверяем, есть ли тексты
+    if (!gameOverTexts || gameOverTexts.length === 0) {
+        console.error('gameOverTexts пустой! Это не должно происходить');
+        
+        // Экстренный запас
+        gameOverTexts = ["Не жди идеального момента. Возьми и сделай этот момент идеальным."];
     }
     
     const randomIndex = Math.floor(Math.random() * gameOverTexts.length);
     const randomText = gameOverTexts[randomIndex];
     
-    console.log(`Selected text #${randomIndex}: "${randomText}"`);
+    console.log(`Выбрана фраза #${randomIndex + 1} из ${gameOverTexts.length}: "${randomText.substring(0, 50)}..."`);
     
+    // Обновляем модальное окно
     document.getElementById('gameOverText').textContent = randomText;
     document.getElementById('gameOverScore').textContent = 'Счет: ' + Math.floor(score);
     document.getElementById('gameOverModal').style.display = 'flex';
@@ -484,11 +505,24 @@ canvas.addEventListener('touchstart', (e) => {
 
 document.getElementById('restartButton').addEventListener('click', resetGame);
 
-// Initialize and start game
+// ГЛАВНОЕ ИЗМЕНЕНИЕ: Загружаем тексты ПЕРЕД запуском игры
 async function startGame() {
+    console.log('Запуск игры...');
+    
+    // Показываем индикатор загрузки
+    document.getElementById('gameOverText').textContent = 'Загрузка мотивационных фраз...';
+    
+    // Ждем загрузки текстов
     await loadGameOverTexts();
+    
+    console.log('Тексты загружены, начинаем игру');
+    
+    // Инициализируем игру
     initGame();
+    
+    // Запускаем игровой цикл
     gameLoop();
 }
 
+// Запускаем игру при загрузке страницы
 startGame();
