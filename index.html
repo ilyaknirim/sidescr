@@ -5,8 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Мотивации | Telegram Mini App Game</title>
     <meta name="description" content="Процедурно генерируемая игра с мотивационными фразами">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+     <style>
+        /* Индикатор частиц */
+        #particleCount {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 12px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: none; /* Можно включить для дебага */
+        }
+    </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
@@ -21,6 +35,9 @@
         </div>
     </div>
     
-    <script src="script.js"></script>
+    <!-- Индикатор частиц (для дебага) -->
+    <div id="particleCount">Частицы: 0</div>
+    
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

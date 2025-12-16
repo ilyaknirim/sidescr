@@ -135,3 +135,16 @@ body {
         font-size: 0.95rem;
     }
 }
+/* Добавьте в конец файла */
+#soundToggle {
+    transition: all 0.3s ease;
+}
+
+#soundToggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+}
+
+#soundToggle:active {
+    transform: scale(0.95);
+}
