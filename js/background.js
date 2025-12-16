@@ -18,7 +18,7 @@ export class BackgroundElement {
     createImage() {
         this.svg = this.generateSVG();
         this.image = new Image();
-        this.image.src = 'data:image/svg+xml;base64,' + btoa(this.svg);
+        this.image.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(this.svg)));
     }
     
     generateSVG() {

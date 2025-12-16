@@ -3,29 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Генератор Мотивации | Telegram Mini App Game</title>
-    <meta name="description" content="Процедурно генерируемая игра с мотивационными фразами">
+    <title>Генератор Мотивации | Бесконечный раннер</title>
+    <meta name="description" content="Процедурно генерируемая игра с мотивационными фразами, звуками и частицами">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
-     <style>
-        /* Индикатор частиц */
-        #particleCount {
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #loading {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             color: white;
-            font-size: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 10px;
-            display: none; /* Можно включить для дебага */
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
+    <!-- Экран загрузки -->
+    <div id="loading">
+        <div class="loader"></div>
+        <h2>Загрузка игры...</h2>
+        <p>Генерация мира и мотивационных фраз</p>
+    </div>
+    
+    <!-- Игровой канвас -->
     <canvas id="gameCanvas"></canvas>
     
-    <!-- Game Over Modal -->
+    <!-- Модальное окно Game Over -->
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
             <h2>🎮 Игра окончена!</h2>
@@ -35,9 +73,14 @@
         </div>
     </div>
     
-    <!-- Индикатор частиц (для дебага) -->
-    <div id="particleCount">Частицы: 0</div>
-    
     <script type="module" src="js/main.js"></script>
+    <script>
+        // Скрываем экран загрузки когда игра готова
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
