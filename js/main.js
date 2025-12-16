@@ -2,7 +2,7 @@
 import { GAME_CONFIG } from './config.js';
 import { resizeCanvas } from './utils.js';
 import { GameState } from './game-state.js';
-import { Character } from './character.js';
+import { Character } from './character_improved.js';
 import { Obstacle } from './obstacle.js';
 import { BackgroundElement } from './background.js';
 import { checkAllCollisions } from './collision.js';
