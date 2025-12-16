@@ -4,14 +4,15 @@ import { Random, btoa } from './utils.js';
 
 export class Obstacle {
     constructor(canvasWidth, baseColor) {
-        this.x = canvasWidth;
+        // Создаем препятствие за пределами экрана с запасом
+        this.x = canvasWidth + 200;
         this.width = Random.size(GAME_CONFIG.OBSTACLE.MIN_WIDTH, GAME_CONFIG.OBSTACLE.MAX_WIDTH);
         this.height = Random.size(GAME_CONFIG.OBSTACLE.MIN_HEIGHT, GAME_CONFIG.OBSTACLE.MAX_HEIGHT);
         this.type = Random.bool() ? 'ground' : 'air';
         this.y = 0;
         this.obstacleType = Random.arrayElement(GAME_CONFIG.OBSTACLE.TYPES);
         this.baseColor = baseColor || Random.color();
-        
+
         this.createImage();
     }
     

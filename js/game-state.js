@@ -28,7 +28,10 @@ export class GameState {
     }
     
     shouldSpawnObstacle() {
-        return this.frameCount % GAME_CONFIG.OBSTACLE_SPAWN_RATE === 0;
+        // Добавляем задержку в начале игры, чтобы препятствия не появлялись сразу
+        const minFramesBeforeFirstObstacle = 300; // Около 5 секунд при 60 FPS
+        return this.frameCount > minFramesBeforeFirstObstacle &&
+               this.frameCount % GAME_CONFIG.OBSTACLE_SPAWN_RATE === 0;
     }
     
     shouldIncreaseSpeed() {
