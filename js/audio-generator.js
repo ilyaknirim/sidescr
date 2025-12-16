@@ -24,8 +24,38 @@ export class AudioGenerator {
     initAudioContext() {
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioContext = new AudioContext();
-            console.log('AudioContext инициализирован');
+
+            // Проверяем, что AudioContext доступен
+            if (!AudioContext) {
+                throw new Error('AudioContext не поддерживается в этом браузере');
+            }
+
+            // Создаем AudioContext только если его еще нет
+            if (!this.audioContext) {
+                this.audioContext = new AudioContext();
+
+                // В некоторых браузерах нужно возобновить AudioContext после пользовательского взаимодействия
+                if (this.audioContext.state === 'suspended') {
+                    // Добавляем обработчик для возобновления контекста при первом клике
+                    const resumeAudio = () => {
+                        this.audioContext.resume().then(() => {
+                            console.log('AudioContext возобновлен');
+                        }).catch(err => {
+                            console.error('Ошибка возобновления AudioContext:', err);
+                            this.isAudioEnabled = false;
+                        });
+
+                        // Удаляем обработчик после первого использования
+                        document.removeEventListener('click', resumeAudio);
+                        document.removeEventListener('touchstart', resumeAudio);
+                    };
+
+                    document.addEventListener('click', resumeAudio, { once: true });
+                    document.addEventListener('touchstart', resumeAudio, { once: true });
+                }
+            }
+
+            console.log('AudioContext инициализирован, состояние:', this.audioContext.state);
         } catch (e) {
             console.warn('Web Audio API не поддерживается:', e);
             this.isAudioEnabled = false;

@@ -247,6 +247,10 @@ export class ParticleSystem {
             if (emitter.currentTime <= emitter.duration) {
                 // Спавн частиц каждый кадр
                 for (let i = 0; i < Math.floor(emitter.count / emitter.duration); i++) {
+                    // Проверка лимита частиц
+                    if (this.particles.length >= GAME_CONFIG.PARTICLES.MAX_PARTICLES) {
+                        break;
+                    }
                     this.particles.push(new Particle(
                         emitter.x + Random.size(-10, 10),
                         emitter.y + Random.size(-10, 10),
@@ -257,9 +261,14 @@ export class ParticleSystem {
             }
             return false;
         });
-        
+
         // Обновление частиц
         this.particles = this.particles.filter(particle => particle.update());
+
+        // Дополнительная проверка лимита (на случай если частицы добавляются другими способами)
+        if (this.particles.length > GAME_CONFIG.PARTICLES.MAX_PARTICLES) {
+            this.particles = this.particles.slice(0, GAME_CONFIG.PARTICLES.MAX_PARTICLES);
+        }
     }
     
     draw(ctx) {
